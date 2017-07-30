@@ -13,7 +13,6 @@
 
 
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
 $factory->define(App\User::class, function (Faker\Generator $faker) {
     static $password;
 
@@ -27,21 +26,21 @@ $factory->define(App\User::class, function (Faker\Generator $faker) {
 $factory->define(App\Brand::class, function(Faker\Generator $faker){
     $faker->addProvider(new \MattWells\Faker\Vehicle\Provider($faker));
     return [
-    'name'=> $faker->vehicleMake,
+    'name'=> $faker->unique()->vehicleMake,
     ];
 });
 
 $factory->define(App\Type::class, function(Faker\Generator $faker){
     $faker->addProvider(new \MattWells\Faker\Vehicle\Provider($faker));
     return [
-        'name'=> $faker->streetName,
+        'name'=> array_random(['Car', 'Bus', 'Truck'])
     ];
 });
 
 $factory->define(App\Vmodel::class, function(Faker\Generator $faker){
     $faker->addProvider(new \MattWells\Faker\Vehicle\Provider($faker));
     return [
-        'name'=>  $faker->vehicleModel,
+        'name'=>  $faker->unique()->vehicleModel,
         'year' => rand(1901, 2017),
         'type_id' => App\Type::orderByRaw("RAND()")->first()->id,
         'brand_id' => App\Brand::orderByRaw("RAND()")->first()->id
@@ -49,8 +48,6 @@ $factory->define(App\Vmodel::class, function(Faker\Generator $faker){
 });
 
 
-
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
 $factory->define(App\Vehicle::class, function (Faker\Generator $faker) {
     $faker->addProvider(new \MattWells\Faker\Vehicle\Provider($faker));
 

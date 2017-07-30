@@ -108,9 +108,9 @@ class UserController extends Controller
         $user = User::where('email', '=', $request->input('email'))->first();
 
         if($user){
-            return response()->json(['message' => 'User exists.'], 204);
+            return response()->json(['message' => 'There\'s already a registered user with this email'], 204);
         } else {
-            return response()->json(['message' => 'User does not exist.'], 404);
+            return response()->json(['message' => 'No email matched, good to go'], 404);
         }
     }
 
@@ -127,9 +127,9 @@ class UserController extends Controller
         $user = User::where('name', '=', $request->input('name'))->first();
 
         if($user){
-            return response()->json(['message' => 'User exists.'], 204);
+            return response()->json(['message' => 'There\'s already a registered user with this username'], 204);
         } else {
-            return response()->json(['message' => 'User does not exist.'], 404);
+            return response()->json(['message' => 'Username does not exist in db, good to go.'], 404);
         }
     }
 }

@@ -20,6 +20,7 @@ class Type extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+
     public function vmodels(){
         return $this->hasMany('App\Vmodel');
     }
@@ -31,4 +32,6 @@ class Type extends Model
     {
         return $this->hasManyThrough('App\Vehicle', 'App\Vmodel');
     }
+
+
 }

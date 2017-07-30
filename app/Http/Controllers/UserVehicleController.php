@@ -104,44 +104,57 @@ class UserVehicleController extends Controller
             //Just making sure for security reasons
             if ($user->id == $userId) {
 
-                //right below we're checking if a record with same values exist on database
-                //for fields: type, brand and vmodel. If so we reference the existing one's id instead of creating new one
-                //it's pretty straight forward but if it still seems blurry see line 256
+                //right below we're checking if a record with same values exist on database, whether it's id or name
+                //for the fields: type, brand and vmodel. If so we reference the existing one's id instead of creating new one
+                //it's pretty straight forward but if it still seems blurry see line 270
+                $brandTextRequest = $this->tailorString($request->get('brandText'));
+                $brandSelectRequest = $request->get('brandSelect');
 
-                $typeRequest = $request->get('type');
-                $typeExist = Type::where('name', '=', trim($typeRequest))->first();
-                if ($typeExist != null) {
-                    //using existing data
-                    $type = $typeExist;
-                } else {
-                    $type = new Type();
-                    $type->name = $typeRequest;
-                    $type->save();
-                }
-
-                $brandRequest = $request->get('brand');
-                $brandExist = Brand::where('name', '=', trim($brandRequest))->first();
-                if ($brandExist != null) {
+                if ($brandSelectRequest != null) {
+                    $brandExist = Brand::where('id', '=', $brandSelectRequest)->first();
                     $brand = $brandExist;
                 } else {
-                    $brand = new Brand();
-                    $brand->name = $brandRequest;
-                    $brand->save();
+                    $brandExist = Brand::where('name', '=', trim($brandTextRequest))->first();
+                    if ($brandExist != null) {
+                        $brand = $brandExist;
+                    } else {
+                        $brand = new Brand();
+                        $brand->name = $brandTextRequest;
+                        $brand->save();
+                    }
+                }
+                $typeTextRequest = $this->tailorString($request->get('typeText'));
+                $typeSelectRequest = $request->get('typeSelect');
+                if ($typeSelectRequest != null) {
+                    $typeExist = Type::where('id', '=', $typeSelectRequest)->first();
+                    $type = $typeExist;
+                } else {
+                    $typeExist = Type::where('name', '=', trim($typeTextRequest))->first();
+                    if ($typeExist != null) {
+                        $type = $typeExist;
+                    } else {
+                        $type = new Type();
+                        $type->name = $typeTextRequest;
+                        $type->save();
+                    }
                 }
 
-                $vmodelNameRequest = $request->get('vehicleModel');
+                $vmodelTextRequest = $this->tailorString($request->get('vehicleModel'));
+                $vmodelSelectRequest = $request->get('modelSelect');
+
                 $vmodelYearRequest = $request->get('modelYear');
-                //check if there's a vmodel record with given data
-                $vmodelExist = Vmodel::where('year', '=', $vmodelYearRequest)
-                    ->where('name', '=', $vmodelNameRequest)
-                    ->where('brand_id', '=', $brand->id)
-                    ->where('type_id', '=', $type->id)
-                    ->first();
-                if ($vmodelExist != null) {
-                    $vmodel = $vmodelExist;
+                if ($vmodelSelectRequest != null) {
+                    $vmodelName = Vmodel::where('id', '=', $vmodelSelectRequest)
+                        ->first();
+                    $vmodel = new Vmodel();
+                    $vmodel->name = $vmodelName->name;
+                    $vmodel->year = $vmodelYearRequest;
+                    $vmodel->type_id = $type->id;
+                    $vmodel->brand_id = $brand->id;
+                    $vmodel->save();
                 } else {
                     $vmodel = new Vmodel();
-                    $vmodel->name = $vmodelNameRequest;
+                    $vmodel->name = $vmodelTextRequest;
                     $vmodel->year = $vmodelYearRequest;
                     $vmodel->type_id = $type->id;
                     $vmodel->brand_id = $brand->id;
@@ -220,13 +233,14 @@ class UserVehicleController extends Controller
     public function update(Request $request, $userId, $vehicleId)
 
     {
+        //acts as a bag for validation errors.
         $response = array('response' => '', 'message' => 'Validation didn\'t pass');
 
         //Request from validation
         $validator = Validator::make($request->only($this->validationArray()),
             //Passing vehicle id because we don't want updating action to
             // conflict with unique plate in case user don't update the plate.
-                ['plate' => 'required|string|min:7|max:8|unique:vehicles,plate,' . $vehicleId, $this->validationRules()]);
+            ['plate' => 'required|string|min:7|max:8|unique:vehicles,plate,' . $vehicleId, $this->validationRules()]);
 
         //return laravel's validation message
         if ($validator->fails()) {
@@ -246,7 +260,7 @@ class UserVehicleController extends Controller
                 //Proceed only if logged in user owns the vehicle
                 if ($vehicle->user_id == $user->id) {
                     //get user's brand choice of car from request
-                    $brandRequest = $request->get('brand');
+                    $brandRequest = $this->tailorString($request->get('brand'));
                     //check if there's a same brand
                     $brandExist = Brand::where('name', '=', trim($brandRequest))->first();
                     //There is
@@ -267,8 +281,8 @@ class UserVehicleController extends Controller
                         $brand->save();
                     }
 
-                    //same thing but with type table (see: 256)
-                    $typeRequest = $request->get('type');
+                    //same thing but with type table (see: 270)
+                    $typeRequest = $this->tailorString($request->get('type'));
                     $typeExist = Type::where('name', '=', trim($typeRequest))->first();
                     if ($typeExist != null) {
                         $type = $typeExist;
@@ -279,24 +293,16 @@ class UserVehicleController extends Controller
                     }
 
                     //ideology is same here so identical code with create method
-                    $vmodelNameRequest = $request->get('vehicleModel');
+                    $vmodelNameRequest = $this->tailorString($request->get('vehicleModel'));
                     $vmodelYearRequest = $request->get('modelYear');
-                    //check if there's a vmodel record with given data
-                    $vmodelExist = Vmodel::where('year', '=', $vmodelYearRequest)
-                        ->where('name', '=', $vmodelNameRequest)
-                        ->where('brand_id', '=', $brand->id)
-                        ->where('type_id', '=', $type->id)
-                        ->first();
-                    if ($vmodelExist != null) {
-                        $vmodel = $vmodelExist;
-                    } else {
-                        $vmodel = new Vmodel();
-                        $vmodel->name = $vmodelNameRequest;
-                        $vmodel->year = $vmodelYearRequest;
-                        $vmodel->type_id = $type->id;
-                        $vmodel->brand_id = $brand->id;
-                        $vmodel->save();
-                    }
+
+                    $vmodel = new Vmodel();
+                    $vmodel->name = $vmodelNameRequest;
+                    $vmodel->year = $vmodelYearRequest;
+                    $vmodel->type_id = $type->id;
+                    $vmodel->brand_id = $brand->id;
+                    $vmodel->save();
+
 
                     //update the vehicle with new
                     $vehicle->update([
@@ -399,5 +405,9 @@ class UserVehicleController extends Controller
         return $requestArr = ['plate', 'nickname', 'vehicleModel', 'brand', 'modelYear', 'type', 'color', 'active'];
     }
 
+    public function tailorString($input)
+    {
+        return str_replace('\' ', '\'', ucwords(str_replace('\'', '\' ', strtolower($input))));
+    }
 
 }

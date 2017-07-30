@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserVehicleController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\VmodelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +38,10 @@ $api->version('v1', function (Dingo\Api\Routing\Router $api) {
         $api->resource('users', UserController::class);
         $api->resource('vehicles', VehicleController::class);
         $api->resource('users.vehicles', UserVehicleController::class);
+        $api->resource('brands', BrandController::class);
+        $api->get('/types', TypeController::class . '@allTypes');
+        $api->get('/brands-of-type', BrandController::class . '@allBrandsOfAType');
+        $api->get('/models-of-brand', VmodelController::class . '@allModelsOfABrand');
         $api->get('/dbSeed', function(){ Artisan::call('db:seed');  return response('Success');  });
 
         //In these routes, request object will return null instead of empty string

@@ -103,10 +103,10 @@ class VehicleController extends Controller
         $vehicle = Vehicle::where('plate', '=', $request->input('plate'))->first();
 
         if($vehicle){
-            return response()->json(['message' => 'Vehicle exists.'], 204);
+            return response()->json(['message' => 'There\'s already a registered vehicle with this plate'], 204);
         } else
         {
-            return response()->json(['message' => 'Vehicle does not exist.'], 404);
+            return response()->json(['message' => 'Vehicle plate did not match any of our records, can be used to register new one'], 404);
         }
     }
 
