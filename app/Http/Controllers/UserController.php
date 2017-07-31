@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display all users.
+     * Route: /users - GET
      *
      * @return \Illuminate\Http\Response
      */
@@ -42,7 +43,7 @@ class UserController extends Controller
 
     /**
      * Display the specified user.
-     * Route: /user/{id} - GET
+     * Route: /users/{id} - GET
      *
      * @param $id
      * @return \Illuminate\Http\Response

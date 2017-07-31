@@ -45,6 +45,12 @@ Migrate the database
 php artisan migrate
 ```
 
+Run the test
+
+```shell
+phpunit
+```
+
 Run the server
 
 ```shell

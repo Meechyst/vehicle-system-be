@@ -139,7 +139,7 @@ class UserVehicleController extends Controller
                     }
                 }
 
-                $vmodelTextRequest = $this->tailorString($request->get('vehicleModel'));
+                $vmodelTextRequest = $this->tailorString($request->get('modelText'));
                 $vmodelSelectRequest = $request->get('modelSelect');
 
                 $vmodelYearRequest = $request->get('modelYear');
@@ -167,7 +167,7 @@ class UserVehicleController extends Controller
                     'nickname' => trim($request->get('nickname')),
                     'color' => trim($request->get('color')),
                     'active' => $request->get('active'),
-                    'vmodel_id' => ($vmodel->id)
+                    'vmodel_id' => $vmodel->id
                 ]);
 
                 //get the latest created vehicle of the user (which we just created)
@@ -405,6 +405,12 @@ class UserVehicleController extends Controller
         return $requestArr = ['plate', 'nickname', 'vehicleModel', 'brand', 'modelYear', 'type', 'color', 'active'];
     }
 
+    /**
+     * Set of built-in string manipulation functions for safer and more elegant entries.
+     *
+     * @param $input
+     * @return mixed
+     */
     public function tailorString($input)
     {
         return str_replace('\' ', '\'', ucwords(str_replace('\'', '\' ', strtolower($input))));
